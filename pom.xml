@@ -12,6 +12,7 @@
 
     <modules>
         <module>auth-service</module>
+        <module>discovery-server</module>
 
     </modules>
 
