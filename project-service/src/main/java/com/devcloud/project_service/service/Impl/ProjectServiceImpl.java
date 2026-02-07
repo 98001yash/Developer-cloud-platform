@@ -44,7 +44,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectResponse> getUserProjects(Long ownerId) {
-        return List.of();
+
+        log.info("Fetching projects for user {}",ownerId);
+
+        return projectRepository.findByOwnerId(ownerId)
+                .stream()
+                .map(this:: mapToProjectResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
