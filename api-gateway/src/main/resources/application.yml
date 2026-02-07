@@ -26,11 +26,20 @@ spring:
               - OPTIONS
 
       routes:
-        -
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
             - Path=/auth/**
+          filters:
+            - AuthenticationFilter
+
+
+        - id: project-service
+          uri: lb://PROJECT-SERVICE
+          predicates:
+            - Path=/project/**
+          filters:
+            - AuthenticationFilter
 
 
 
