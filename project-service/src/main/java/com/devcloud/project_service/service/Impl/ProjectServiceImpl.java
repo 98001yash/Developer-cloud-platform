@@ -82,7 +82,24 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public EnvironmentResponse addEnvironment(Long ownerId, Long projectId, CreateEnvironmentRequest request) {
-        return null;
+
+        log.info("Adding environment {} to project {} for user {}",
+                request.getName(), projectId, ownerId);
+
+        Project project = projectRepository.findByIdAndOwnerId(projectId, ownerId)
+                .orElseThrow(()->{
+                    log.warn("Environment creation failed: project {} not found",projectId);
+                    return new ResourceNotFoundException("Project not found");
+                });
+
+        Environment environment = Environment.builder()
+                .name(request.getName())
+                .project(project)
+                .build();
+        environment = environmentRepository.save(environment);
+
+        log.info("Environment {} created with id {}",environment.getName(), environment.getId());
+        return mapToEnvironmentResponse(environment);
     }
 
     @Override
