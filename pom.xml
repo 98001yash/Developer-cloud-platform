@@ -13,6 +13,7 @@
     <modules>
         <module>auth-service</module>
         <module>discovery-server</module>
+        <module>project-service</module>
 
     </modules>
 
