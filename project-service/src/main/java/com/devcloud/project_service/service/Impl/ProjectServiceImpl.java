@@ -104,7 +104,20 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<EnvironmentResponse> getEnvironments(Long ownerId, Long projectId) {
-        return List.of();
+        log.info("Fetching environments for project {} (user {})",
+                projectId, ownerId);
+
+        // Verify ownership
+        projectRepository.findByIdAndOwnerId(projectId, ownerId)
+                .orElseThrow(() -> {
+                    log.warn("Environment fetch failed: project {} not found", projectId);
+                    return new ResourceNotFoundException("Project not found");
+                });
+
+        return environmentRepository.findByProjectId(projectId)
+                .stream()
+                .map(this::mapToEnvironmentResponse)
+                .collect(Collectors.toList());
     }
 
 
