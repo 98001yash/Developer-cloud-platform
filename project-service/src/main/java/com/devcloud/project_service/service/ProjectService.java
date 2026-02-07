@@ -9,16 +9,15 @@ import java.util.List;
 
 public interface ProjectService {
 
-    ProjectResponse createProject(Long ownerId, CreateProjectRequest request);
+    ProjectResponse createProject(CreateProjectRequest request);
 
-    List<ProjectResponse> getUserProjects(Long ownerId);
+    List<ProjectResponse> getUserProjects();
 
-    ProjectResponse getProjectById(Long ownerId, Long projectId);
+    ProjectResponse getProjectById(Long projectId);
 
-    void deleteProject(Long ownerId, Long projectId);
+    void deleteProject(Long projectId);
 
-    EnvironmentResponse addEnvironment(Long ownerId, Long projectId, CreateEnvironmentRequest request);
+    EnvironmentResponse addEnvironment(Long projectId, CreateEnvironmentRequest request);
 
-    List<EnvironmentResponse> getEnvironments(Long ownerId, Long projectId);
-
+    List<EnvironmentResponse> getEnvironments(Long projectId);
 }
