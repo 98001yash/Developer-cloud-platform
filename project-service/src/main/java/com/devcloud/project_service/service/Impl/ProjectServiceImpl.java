@@ -3,6 +3,7 @@ package com.devcloud.project_service.service.Impl;
 
 import com.devcloud.project_service.entity.Environment;
 import com.devcloud.project_service.entity.Project;
+import com.devcloud.project_service.exceptions.ResourceNotFoundException;
 import com.devcloud.project_service.repository.EnvironmentRepository;
 import com.devcloud.project_service.repository.ProjectRepository;
 import com.devcloud.project_service.request.CreateEnvironmentRequest;
@@ -55,7 +56,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse getProjectById(Long ownerId, Long projectId) {
-        return null;
+        log.info("Ferching project {} for user {}",projectId, ownerId);
+
+        Project project = projectRepository.findByIdAndOwnerId(projectId, ownerId)
+                .orElseThrow(()-> {
+                    log.warn("Project {} not found for user {}",projectId, ownerId);
+                    return new ResourceNotFoundException("Project not found");
+                });
+        return mapToProjectResponse(project);
     }
 
     @Override
