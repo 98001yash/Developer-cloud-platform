@@ -68,7 +68,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void deleteProject(Long ownerId, Long projectId) {
+       log.info("Deleting project {} for user {}",projectId, ownerId);
 
+       Project project = projectRepository.findByIdAndOwnerId(projectId, ownerId)
+               .orElseThrow(()-> {
+                   log.warn("Delete failed: project {} not found for user {}",projectId, ownerId);
+                   return new ResourceNotFoundException("project not found");
+               });
+
+       projectRepository.delete(project);
+       log.info("Project {} deleted",projectId);
     }
 
     @Override
