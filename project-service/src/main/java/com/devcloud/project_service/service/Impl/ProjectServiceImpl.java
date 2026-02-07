@@ -28,7 +28,18 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse createProject(Long ownerId, CreateProjectRequest request) {
-        return null;
+
+        log.info("Creating a project {} for user {}",request.getName(), ownerId);
+
+        Project project = Project.builder()
+                .name(request.getName())
+                .ownerId(ownerId)
+                .build();
+
+        project = projectRepository.save(project);
+
+        log.info("Project created with id {}",project.getId());
+        return mapToProjectResponse(project);
     }
 
     @Override
