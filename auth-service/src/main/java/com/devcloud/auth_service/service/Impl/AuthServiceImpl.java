@@ -82,7 +82,6 @@ public class AuthServiceImpl implements AuthService {
             log.warn("Login failed: incorrect password for email: {}", request.getEmail());
             throw new RuntimeConflictException("Invalid email or password");
         }
-
         log.info("User logged in successfully: {}", user.getEmail());
 
         // Generate JWT
