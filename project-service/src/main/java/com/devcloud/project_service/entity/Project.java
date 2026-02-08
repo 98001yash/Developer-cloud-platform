@@ -32,7 +32,7 @@ public class Project {
             mappedBy = "project",
             cascade = CascadeType.ALL,
             orphanRemoval = true
-    )
+    )@Builder.Default
     private List<Environment> environments = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)

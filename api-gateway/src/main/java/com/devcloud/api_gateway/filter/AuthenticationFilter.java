@@ -23,9 +23,11 @@ public class AuthenticationFilter implements GlobalFilter {
                              GatewayFilterChain chain) {
 
         String path = exchange.getRequest().getURI().getPath();
+        log.info("Incoming request path: {}", path);
 
         // Allow auth endpoints
         if (path.startsWith("/auth")) {
+            log.info("Auth endpoint, skipping JWT check");
             return chain.filter(exchange);
         }
 
@@ -33,14 +35,17 @@ public class AuthenticationFilter implements GlobalFilter {
                 .getHeaders()
                 .getFirst(HttpHeaders.AUTHORIZATION);
 
+        log.info("Authorization header: {}", authHeader);
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Missing Authorization header");
+            log.warn("Missing or invalid Authorization header");
             exchange.getResponse().setStatusCode(
                     org.springframework.http.HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
         String token = authHeader.substring(7);
+        log.info("Extracted token: {}", token);
 
         if (!jwtUtil.isTokenValid(token)) {
             log.warn("Invalid JWT token");
@@ -50,18 +55,16 @@ public class AuthenticationFilter implements GlobalFilter {
         }
 
         Long userId = jwtUtil.extractUserId(token);
+        log.info("Authenticated userId: {}", userId);
 
-        // Add userId header to downstream services
         ServerHttpRequest modifiedRequest = exchange.getRequest()
                 .mutate()
                 .header("X-User-Id", String.valueOf(userId))
                 .build();
 
-        log.info("Authenticated user {}", userId);
-
         return chain.filter(exchange.mutate()
                 .request(modifiedRequest)
                 .build());
     }
-
 }
+
