@@ -24,10 +24,8 @@ public class BuildExecutorImpl implements BuildExecutor{
 
 
     @Override
-    @Async
+    @Async("buildExecutor")
     public void executeBuild(Build build) {
-
-
         try {
             log.info("Async build {} started", build.getId());
 
