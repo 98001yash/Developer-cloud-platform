@@ -4,7 +4,7 @@ public enum BuildStatus {
 
 
     PENDING,
-    RUNTIME,
+    RUNNING,
     SUCCESS,
     FAILED
 }
