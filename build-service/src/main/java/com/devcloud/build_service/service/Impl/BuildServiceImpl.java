@@ -10,6 +10,7 @@ import com.devcloud.build_service.repository.BuildRepository;
 import com.devcloud.build_service.request.CreateBuildRequest;
 import com.devcloud.build_service.response.BuildLogResponse;
 import com.devcloud.build_service.response.BuildResponse;
+import com.devcloud.build_service.service.BuildExecutor;
 import com.devcloud.build_service.service.BuildService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,8 @@ public class BuildServiceImpl implements BuildService {
 
     private final BuildRepository buildRepository;
     private final BuildLogRepository buildLogRepository;
+    private final BuildExecutor buildExecutor;
+
 
     @Override
     public BuildResponse createBuild(CreateBuildRequest request) {
@@ -44,8 +47,7 @@ public class BuildServiceImpl implements BuildService {
         log.info("Build {} created with status PENDING",build.getId());
 
         // simulated execution
-         simulateBuildExecution(build);
-
+        buildExecutor.executeBuild(build);
          return mapToBuildResponse(build);
     }
 
@@ -92,43 +94,6 @@ public class BuildServiceImpl implements BuildService {
                 .stream()
                 .map(this::mapToLogResponse)
                 .collect(Collectors.toList());
-    }
-
-    // Simulated Build Execution (temporary)
-    private void simulateBuildExecution(Build build) {
-
-        try {
-            log.info("Starting simulated execution for build {}", build.getId());
-
-            build.setStatus(BuildStatus.RUNNING);
-            buildRepository.save(build);
-
-            saveLog(build, "Cloning repository...");
-            Thread.sleep(1000);
-
-            saveLog(build, "Installing dependencies...");
-            Thread.sleep(1000);
-
-            saveLog(build, "Running build...");
-            Thread.sleep(1000);
-
-            build.setStatus(BuildStatus.SUCCESS);
-            build.setFinishedAt(Instant.now());
-            buildRepository.save(build);
-
-            saveLog(build, "Build completed successfully");
-
-            log.info("Build {} finished successfully", build.getId());
-
-        } catch (Exception ex) {
-            log.error("Build {} failed: {}", build.getId(), ex.getMessage());
-
-            build.setStatus(BuildStatus.FAILED);
-            build.setFinishedAt(Instant.now());
-            buildRepository.save(build);
-
-            saveLog(build, "Build failed: " + ex.getMessage());
-        }
     }
 
     private void saveLog(Build build, String message) {
