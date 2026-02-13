@@ -13,4 +13,11 @@ public interface DeploymentService {
     List<DeploymentResponse> getProjectDeployments(Long userId, Long projectId);
 
     DeploymentDetailsResponse getDeploymentDetails(Long userId, Long deploymentId);
+
+    DeploymentResponse stopDeployment(Long userId, Long deploymentId);
+
+    DeploymentResponse restartDeployment(Long userId, Long deploymentId);
+
+
+
 }
