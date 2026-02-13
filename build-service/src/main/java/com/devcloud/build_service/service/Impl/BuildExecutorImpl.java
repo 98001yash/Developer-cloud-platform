@@ -55,10 +55,6 @@ public class BuildExecutorImpl implements BuildExecutor {
             runCommand(build, workDir,
                     "docker", "build", "-t", imageTag, ".");
 
-            // Step 3: Run container
-            runCommand(build, workDir,
-                    "docker", "run", "--rm", imageTag);
-
             build.setStatus(BuildStatus.SUCCESS);
             build.setFinishedAt(Instant.now());
             buildRepository.save(build);
