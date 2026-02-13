@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -64,16 +65,34 @@ public class BuildServiceImpl implements BuildService {
 
     @Override
     public List<BuildResponse> getProjectBuilds(Long projectId) {
-        return List.of();
+
+        Long userId = UserContextHolder.getCurrentUserId();
+        log.info("User {} fetching builds for project {}",userId, projectId);
+
+        return buildRepository.findByProjectIdOrderByIdDesc(projectId)
+                .stream()
+                .map(this::mapToBuildResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<BuildLogResponse> getBuildLogs(Long buildId) {
-        return List.of();
+
+        Long userId = UserContextHolder.getCurrentUserId();
+
+        log.info("User {} fetching build logs for build {}", userId, buildId);
+        ;
+
+        if (!buildRepository.existsById(buildId)) {
+            log.warn("Build {} not found while fetching logs", buildId);
+            throw new ResourceNotFoundException("Build not found");
+        }
+
+        return buildLogRepository.findByBuildIdOrderByTimestampAsc(buildId)
+                .stream()
+                .map(this::mapToLogResponse)
+                .collect(Collectors.toList());
     }
-
-
-
 
     // Simulated Build Execution (temporary)
     private void simulateBuildExecution(Build build) {
