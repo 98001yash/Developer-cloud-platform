@@ -1,10 +1,11 @@
-package com.devcloud.build_service.service;
+package com.devcloud.build_service.service.Impl;
 
 import com.devcloud.build_service.entities.Build;
 import com.devcloud.build_service.entities.BuildLog;
 import com.devcloud.build_service.enums.BuildStatus;
 import com.devcloud.build_service.repository.BuildLogRepository;
 import com.devcloud.build_service.repository.BuildRepository;
+import com.devcloud.build_service.service.BuildExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -16,7 +17,7 @@ import java.time.Instant;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class BuildExecutorImpl implements BuildExecutor{
+public class BuildExecutorImpl implements BuildExecutor {
 
     private final BuildRepository buildRepository;
     private final BuildLogRepository buildLogRepository;
