@@ -11,6 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Instant;
 
 
@@ -27,27 +31,39 @@ public class BuildExecutorImpl implements BuildExecutor {
     @Override
     @Async("buildExecutor")
     public void executeBuild(Build build) {
+
         try {
             log.info("Async build {} started", build.getId());
 
             build.setStatus(BuildStatus.RUNNING);
             buildRepository.save(build);
 
-            saveLog(build, "Cloning repository...");
-            Thread.sleep(1000);
+            // Create working directory
+            String workDir = "builds/build-" + build.getId();
+            new File(workDir).mkdirs();
 
-            saveLog(build, "Installing dependencies...");
-            Thread.sleep(1000);
+            // Step 1: Clone repo
+            runCommand(build, workDir,
+                    "git", "clone", "-b",
+                    build.getBranch() == null ? "main" : build.getBranch(),
+                    build.getRepoUrl(),
+                    ".");
 
-            saveLog(build, "Running build...");
-            Thread.sleep(1000);
+            // Step 2: Docker build
+            String imageTag = "project-" + build.getProjectId() + "-build-" + build.getId();
+
+            runCommand(build, workDir,
+                    "docker", "build", "-t", imageTag, ".");
+
+            // Step 3: Run container
+            runCommand(build, workDir,
+                    "docker", "run", "--rm", imageTag);
 
             build.setStatus(BuildStatus.SUCCESS);
             build.setFinishedAt(Instant.now());
             buildRepository.save(build);
 
             saveLog(build, "Build completed successfully");
-
             log.info("Build {} completed successfully", build.getId());
 
         } catch (Exception ex) {
@@ -61,6 +77,7 @@ public class BuildExecutorImpl implements BuildExecutor {
         }
     }
 
+
     private void saveLog(Build build, String message) {
         BuildLog logEntry = BuildLog.builder()
                 .build(build)
@@ -70,4 +87,33 @@ public class BuildExecutorImpl implements BuildExecutor {
 
         buildLogRepository.save(logEntry);
     }
+
+
+    // Helper methods
+
+    private void runCommand(Build build, String workDir, String... command)
+            throws IOException, InterruptedException {
+
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        processBuilder.directory(new File(workDir));
+        processBuilder.redirectErrorStream(true);
+
+        Process process = processBuilder.start();
+
+        try (BufferedReader reader =
+                     new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                saveLog(build, line);
+            }
+        }
+
+        int exitCode = process.waitFor();
+
+        if (exitCode != 0) {
+            throw new RuntimeException("Command failed: " + String.join(" ", command));
+        }
+    }
+
 }

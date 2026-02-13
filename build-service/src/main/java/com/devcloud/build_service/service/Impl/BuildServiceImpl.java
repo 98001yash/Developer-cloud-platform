@@ -39,6 +39,8 @@ public class BuildServiceImpl implements BuildService {
         Build build = Build.builder()
                 .projectId(request.getProjectId())
                 .environment(request.getEnvironment())
+                .repoUrl(request.getRepoUrl())
+                .branch(request.getBranch())
                 .status(BuildStatus.PENDING)
                 .startedAt(Instant.now())
                 .build();

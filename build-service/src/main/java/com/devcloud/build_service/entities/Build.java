@@ -46,4 +46,12 @@ public class Build {
     )
     @Builder.Default
     private List<BuildLog> logs = new ArrayList<>();
+
+
+    @Column(name = "repo_url", nullable = false)
+    private String repoUrl;
+
+    @Column(name = "branch")
+    private String branch;
+
 }
