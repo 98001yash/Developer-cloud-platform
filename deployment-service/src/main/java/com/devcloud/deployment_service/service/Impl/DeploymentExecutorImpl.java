@@ -33,7 +33,7 @@ public class DeploymentExecutorImpl implements DeploymentExecutor {
 
         try {
             // Update status to STARTING
-            deployment.setStatus(DeploymentStatus.RUNNING);
+            deployment.setStatus(DeploymentStatus.STARTING);
             deploymentRepository.save(deployment);
 
             // Assign random port

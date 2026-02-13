@@ -96,11 +96,9 @@ public class DeploymentServiceImpl implements DeploymentService {
 
             deployment.setStatus(DeploymentStatus.STOPPED);
             deploymentRepository.save(deployment);
-
             log.info("Deployment {} stopped successfully", deploymentId);
 
             return mapToResponse(deployment);
-
         } catch (Exception ex) {
             log.error("Failed to stop deployment {}: {}", deploymentId, ex.getMessage());
             throw new RuntimeException("Stop deployment failed");
@@ -109,8 +107,35 @@ public class DeploymentServiceImpl implements DeploymentService {
 
     @Override
     public DeploymentResponse restartDeployment(Long userId, Long deploymentId) {
-        return null;
-    }
+
+        log.info("User {} requested for development {}", userId, deploymentId);
+
+            Deployment deployment = deploymentRepository.findById(deploymentId)
+                    .orElseThrow(() -> new RuntimeException("Deployment not found"));
+
+            if (deployment.getContainerId() == null) {
+                throw new RuntimeException("No container for this deployment");
+            }
+
+            try {
+                String command = "docker restart " + deployment.getContainerId();
+                Process process = Runtime.getRuntime().exec(command);
+                int exitCode = process.waitFor();
+
+                if (exitCode != 0) {
+                    throw new RuntimeException("Docker restart failed");
+                }
+                deployment.setStatus(DeploymentStatus.RUNNING);
+                deploymentRepository.save(deployment);
+
+                log.info("Deployment {} restarted successfully", deploymentId);
+                return mapToResponse(deployment);
+
+            } catch (Exception ex) {
+                log.error("Failed to restart deployment {}: {}", deploymentId, ex.getMessage());
+                throw new RuntimeException("Restart deployment failed");
+            }
+        }
 
     //  MAPPERS
 
