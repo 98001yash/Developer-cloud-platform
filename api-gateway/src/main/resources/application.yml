@@ -37,6 +37,11 @@ spring:
           predicates:
             - Path=/projects/**
 
+        - id: build-service
+          uri: lb://BUILD-SERVICE
+          predicates:
+            - Path=/builds/**
+
 
 
 eureka:
