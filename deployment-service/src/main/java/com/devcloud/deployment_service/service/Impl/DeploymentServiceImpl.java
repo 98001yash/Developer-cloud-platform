@@ -74,6 +74,44 @@ public class DeploymentServiceImpl implements DeploymentService {
         return mapToDetailsResponse(deployment);
     }
 
+    @Override
+    public DeploymentResponse stopDeployment(Long userId, Long deploymentId) {
+
+        log.info("User {} requested STOP for deployment {}",userId, deploymentId);
+
+        Deployment deployment = deploymentRepository.findById(deploymentId)
+                .orElseThrow(()-> new RuntimeException("Deployment not found"));
+
+        if(deployment.getContainerId() == null){
+            throw new RuntimeException("no running container for this deployment");
+        }
+        try {
+            String command = "docker stop " + deployment.getContainerId();
+            Process process = Runtime.getRuntime().exec(command);
+            int exitCode = process.waitFor();
+
+            if (exitCode != 0) {
+                throw new RuntimeException("Docker stop failed");
+            }
+
+            deployment.setStatus(DeploymentStatus.STOPPED);
+            deploymentRepository.save(deployment);
+
+            log.info("Deployment {} stopped successfully", deploymentId);
+
+            return mapToResponse(deployment);
+
+        } catch (Exception ex) {
+            log.error("Failed to stop deployment {}: {}", deploymentId, ex.getMessage());
+            throw new RuntimeException("Stop deployment failed");
+        }
+    }
+
+    @Override
+    public DeploymentResponse restartDeployment(Long userId, Long deploymentId) {
+        return null;
+    }
+
     //  MAPPERS
 
     private DeploymentResponse mapToResponse(Deployment deployment) {
