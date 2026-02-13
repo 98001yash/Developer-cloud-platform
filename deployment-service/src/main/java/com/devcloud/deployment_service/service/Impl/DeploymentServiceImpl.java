@@ -6,6 +6,7 @@ import com.devcloud.deployment_service.dtos.DeploymentResponse;
 import com.devcloud.deployment_service.entity.Deployment;
 import com.devcloud.deployment_service.enums.DeploymentStatus;
 import com.devcloud.deployment_service.repository.DeploymentRepository;
+import com.devcloud.deployment_service.service.DeploymentExecutor;
 import com.devcloud.deployment_service.service.DeploymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 public class DeploymentServiceImpl implements DeploymentService {
 
     private final DeploymentRepository deploymentRepository;
+    private final DeploymentExecutor deploymentExecutor;
+
 
     @Override
     public DeploymentResponse deploy(Long userId, Long projectId, DeployRequest request) {
@@ -42,6 +45,7 @@ public class DeploymentServiceImpl implements DeploymentService {
         log.info("Deployment {} created with status {}",
                 deployment.getId(), deployment.getStatus());
 
+        deploymentExecutor.executeDeployment(deployment.getId());
         return mapToResponse(deployment);
     }
 
