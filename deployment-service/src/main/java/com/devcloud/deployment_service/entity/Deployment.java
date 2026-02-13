@@ -41,6 +41,8 @@ public class Deployment {
     @Column(nullable = false)
     private DeploymentStatus status;
 
+    private String environment;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
