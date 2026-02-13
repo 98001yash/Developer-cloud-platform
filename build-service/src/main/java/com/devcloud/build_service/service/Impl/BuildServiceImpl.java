@@ -4,6 +4,7 @@ import com.devcloud.build_service.auth.UserContextHolder;
 import com.devcloud.build_service.entities.Build;
 import com.devcloud.build_service.entities.BuildLog;
 import com.devcloud.build_service.enums.BuildStatus;
+import com.devcloud.build_service.exceptions.ResourceNotFoundException;
 import com.devcloud.build_service.repository.BuildLogRepository;
 import com.devcloud.build_service.repository.BuildRepository;
 import com.devcloud.build_service.request.CreateBuildRequest;
@@ -49,7 +50,16 @@ public class BuildServiceImpl implements BuildService {
 
     @Override
     public BuildResponse getBuild(Long buildId) {
-        return null;
+        Long userId = UserContextHolder.getCurrentUserId();
+        log.info("User {} fetching build {}",userId, buildId);
+
+        Build build = buildRepository.findById(buildId)
+                .orElseThrow(()-> {
+                    log.warn("Build {} not found",buildId);
+                    return new ResourceNotFoundException("Build not found");
+                });
+
+        return mapToBuildResponse(build);
     }
 
     @Override
