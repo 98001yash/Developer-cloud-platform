@@ -15,6 +15,7 @@
         <module>discovery-server</module>
         <module>project-service</module>
         <module>build-service</module>
+        <module>deployment-service</module>
         <module>api-gateway</module>
 
     </modules>
